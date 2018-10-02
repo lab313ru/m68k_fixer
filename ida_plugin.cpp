@@ -314,6 +314,16 @@ static ssize_t idaapi hook_idp(void *user_data, int notification_code, va_list v
             insn->add_cref(trap_addr, insn->Op1.offb, fl_CN);
             return 1;
         }
+        
+        if (cmd.itype == 0x76 && cmd.Op1.phrase == 0x5B && cmd.Op1.specflag1 == 0x10) // lea table(pc),Ax
+        {
+            short diff = cmd.Op1.addr - cmd.ea;
+            if (diff >= SHRT_MIN && diff <= SHRT_MAX)
+            {
+                ua_add_dref(cmd.Op1.offb, cmd.Op1.addr, dr_O);
+                return 2;
+            }
+        }
 
         if (insn->itype == M68K_linea || insn->itype == M68K_linef)
         {
